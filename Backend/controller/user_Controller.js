@@ -1,4 +1,6 @@
 const express = require('express');
+const cloudinary = require('cloudinary').v2;
+
 const { User } = require('../model/User_Model');
 const Notification = require('../model/notification_schema');
 const bcrypt = require('bcrypt');
@@ -88,52 +90,78 @@ return res.json(suggestedUser);
    }
 } 
 
-const Updateuser = async (req,res) =>{
-  
-    const  CurrentLogin = await User.findById(req.user.id);
-    if(!CurrentLogin){
-      return res.status(404).json({error: 'User not found'});
+const Updateuser = async (req, res) => {
+  const userId = req.user.id; // Use `id` directly from `req.user`
+
+  try {
+    let user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
     }
-    // const UpdatedField = req.body;
-    const {fullname , email, username , currentpassword , newPassword , bio , link} = req.body;
-    let{profileImage , coverImage } =  req.body;
 
-    const userId = req.user._id;
-    try {
-   const user = await User.findById(userId);
-   if(!user){
-    return res.status(404).json({error: 'User not found'});
-   }
-   if((!newPassword && !currentpassword) || (newPassword && !currentpassword)){
-    return res.status(400).json({error: 'Please enter current password and new password'});
-   }
-   if(newPassword && currentpassword){
+    const { fullname, email, username, currentpassword, newPassword, bio, link } = req.body;
+    let { profileImage, coverImage } = req.body;
 
-    const  isValidPassword = await bcrypt.compare(currentpassword , user.password);
-if(!isValidPassword){
-  return res.status(400).json({error: 'Invalid current password'});
-}
-if(newPassword.length < 6){
-  return res.status(400).json({error: 'Password must be at least 6 character'})
-}
-const salt = await bcrypt.genSalt(10);
-const hashedPassword = await bcrypt.hash(newPassword, salt);
-user.password = hashedPassword;
-   }
+    // Password update logic
+    if (newPassword && !currentpassword) {
+      return res.status(400).json({ error: 'Please enter current password and new password' });
+    }
 
+    if (newPassword && currentpassword) {
+      const isValidPassword = await bcrypt.compare(currentpassword, user.password);
+      if (!isValidPassword) {
+        return res.status(400).json({ error: 'Invalid current password' });
+      }
+      if (newPassword.length < 6) {
+        return res.status(400).json({ error: 'Password must be at least 6 characters' });
+      }
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(newPassword, salt);
+    }
 
-   if(profileImage){
+    // Profile Image update logic
+    if (profileImage) {
+      if (user.profileImage) {
+        await cloudinary.uploader.destroy(user.profileImage.split("/").pop().split(".")[0]);
+      }
+      const uploadedResponse = await cloudinary.uploader.upload(profileImage);
+      user.profileImage = uploadedResponse.secure_url;
+    }
 
-   }
-   if(coverImage){
+    // Cover Image update logic
+    if (coverImage) {
+      if (user.coverImage) {
+        await cloudinary.uploader.destroy(user.coverImage.split("/").pop().split(".")[0]);
+      }
+      const uploadedResponse = await cloudinary.uploader.upload(coverImage);
+      user.coverImage = uploadedResponse.secure_url;
+    }
 
-   }
+    // Update user fields
+    user.fullname = fullname || user.fullname;
+    user.email = email || user.email;
+    user.username = username || user.username;
+    user.bio = bio || user.bio;
+    user.link = link || user.link;
 
+    await user.save();
+    user.password = null; // Remove password from response
+
+    return res.status(200).json(user);
   } catch (error) {
-    console.log(error);
-    res.status(500).json({error: 'Error updating user'});
+    console.error('Error updating user:', error);
+    res.status(500).json({ error: 'Error updating user' });
   }
+};
 
-}
- 
 module.exports = { getUserProfile, followUnfollowUser,  getSuggestedUser,Updateuser };
+
+
+
+/*
+ Usage:
+
+Use req.user._id when working directly with MongoDB queries.
+
+Use req.user.id when you need a string representation for comparisons or API responses.
+*/ 
