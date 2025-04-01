@@ -8,7 +8,7 @@ const userRouter = require('./routes/userRouter.js');
 const db = require('./database/db.js');
 const cookieParser = require('cookie-parser');
 const cloudinary = require('cloudinary').v2;
-
+const postrouter = require('./routes/postrouter.js');
 
 
 const app = express();
@@ -24,6 +24,7 @@ cloudinary.config({
 
 app.use('/api/auth', authRouter);
 app.use('/api/user', userRouter);
+app.use('/api/post', postrouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
