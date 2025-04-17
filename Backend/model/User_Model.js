@@ -1,5 +1,4 @@
-// const express = require('express'); // You don't need express here
-const mongoose = require('mongoose'); // You wrote 'mongodb', but it should be 'mongoose'
+const mongoose = require('mongoose');
 
 // Define Schema
 const UserSchema = new mongoose.Schema({
@@ -15,7 +14,7 @@ const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true // It's good practice to make email unique
+    unique: true
   },
   password: {
     type: String,
@@ -24,15 +23,13 @@ const UserSchema = new mongoose.Schema({
   followers: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Always reference the Model name
-      default: []
+      ref: "User"
     }
   ],
   following: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      default: []
+      ref: "User"
     }
   ],
   profileImage: {
@@ -46,8 +43,14 @@ const UserSchema = new mongoose.Schema({
   link: {
     type: String,
     default: ""
-  }
-}, { timestamps: true }); // You wrote 'timestamp', correct option is 'timestamps'
+  }, 
+  likedPost: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Post"
+    }
+  ]
+}, { timestamps: true });
 
 // Create Model
 const User = mongoose.model("User", UserSchema);
