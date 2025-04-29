@@ -1,20 +1,14 @@
-
-
+// routes/authRouter.js
 const express = require('express');
-// const app = express();
 const router = express.Router();
-const  protectroute = require('../MiddleWare/protectroute.js')
-const {signup, login, logout, getMe} = require('../controller/authController.js');
+const {login , logout, signup, getMe} = require('../controller/authController.js')
+const protectedRoute = require('../controller/authController.js')
+
+router.post('/get', protectedRoute ,getMe );
+
+router.post('/signup', signup);
+router.post('/login', login);
+router.post('/logout', logout);
 
 
-router.post('/sign', signup)
-
-
-router.post('/login', login)
-router.get('/getMe',protectroute, getMe);    // protectroute in the middlefunction in which they have been it call the first in it 
-
-
-router.get('/logout', logout)
-module.exports = router;
-
-
+module.exports = router; // ✅ Important

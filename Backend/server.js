@@ -1,31 +1,24 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-dotenv.config();
-const PORT = process.env.PORT || 5000;
-const authRouter = require('./routes/authRouter.js');
-const userRouter = require('./routes/userRouter.js');
-const db = require('./database/db.js');
-const cookieParser = require('cookie-parser');
-const cloudinary = require('cloudinary').v2;
-const postrouter = require('./routes/postrouter.js');
 
-
+const dotenv = require('dotenv')
 const app = express();
-app.use(express.json());  // for req.body
-app.use(cookieParser());  // for req.cookies
+const connectdb = require('./database/db.js')
+const authRoute = require('./routes/authRouter.js');
+const cookieParser = require('cookie-parser');
 
-db.connectDb();
-cloudinary.config({
-    cloud_name : process.env.CLOUDINARY_CLOUD_NAME,
-    api_key  : process.env.CLOUDINARY_API_KEY,
-    api_secret  : process.env.CLOUDINARY_API_SECRET
-})
+require('dotenv').config();
 
-app.use('/api/auth', authRouter);
-app.use('/api/user', userRouter);
-app.use('/api/post', postrouter);
+app.use(express.json());
+// for the token in which they have been there in which we are using so we are using the cookies Parser as the middleware in it 
+app.use(cookieParser());
+connectdb();
+  app.use('/api/auth', authRoute);
+  app.get('/hey', (req,res) =>{
+    res.send('hey')
+  })
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+const PORT = process.env.PORT|| 8000;
+  app.listen(PORT, () =>{
+    console.log(`THE SERVER IS RUNNING ON THE ${PORT}`)
+  })
+  
