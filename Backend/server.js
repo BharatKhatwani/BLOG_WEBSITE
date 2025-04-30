@@ -1,24 +1,31 @@
 const express = require('express');
-
-const dotenv = require('dotenv')
-const app = express();
-const connectdb = require('./database/db.js')
-const authRoute = require('./routes/authRouter.js');
+const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 
-require('dotenv').config();
+const connectdb = require('./database/db.js');
+const authRoute = require('./routes/authRouter.js');
+const userRoute = require('./routes/userRouter.js'); // Fixed path
 
+dotenv.config(); // Call dotenv before using environment variables
+
+const app = express();
+
+// Middleware
 app.use(express.json());
-// for the token in which they have been there in which we are using so we are using the cookies Parser as the middleware in it 
 app.use(cookieParser());
-connectdb();
-  app.use('/api/auth', authRoute);
-  app.get('/hey', (req,res) =>{
-    res.send('hey')
-  })
 
-const PORT = process.env.PORT|| 8000;
-  app.listen(PORT, () =>{
-    console.log(`THE SERVER IS RUNNING ON THE ${PORT}`)
-  })
-  
+// Connect to database
+connectdb();
+
+// Routes
+app.use('/api/auth', authRoute);
+app.use('/api/user', userRoute); // Add user route (optional if used)
+app.get('/hey', (req, res) => {
+  res.send('hey');
+});
+
+// Start server
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});

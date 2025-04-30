@@ -17,6 +17,7 @@ const generateTokenandSetCookie = (userId, res) => {
     console.log("Cookie has been set with JWT.");
 
     // Return the token to include it in the response body
+    console.log("Token",  token)
     return token;
 };
 

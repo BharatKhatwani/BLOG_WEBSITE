@@ -103,11 +103,12 @@ const login = async (req, res) => {
         }
 
         // 4. Generate token & set cookie
-        generateTokenandSetCookie(user._id, res);
+        const token = generateTokenandSetCookie(user._id, res); // Capture the token
 
         // 5. Send response
         res.status(200).json({
             message: "Login successful",
+            token, // Send the token in the response body
             user: {
                 _id: user._id,
                 username: user.username,
@@ -127,6 +128,7 @@ const login = async (req, res) => {
         res.status(500).json({ message: "Something went wrong" });
     }
 };
+
 
 // module.exports = login;
 
@@ -154,7 +156,7 @@ const logout = async (req, res) => {
 const getMe = async(req,res) =>{
     try {
     const user = await User.findById(req.user_id).select('-password');
-    
+    res.status(200).json({user})
         
     } catch (error) {
         console.log(error);

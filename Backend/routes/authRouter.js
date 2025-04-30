@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const {login , logout, signup, getMe} = require('../controller/authController.js')
-const protectedRoute = require('../controller/authController.js')
+const {protectedRoute} = require('../MiddleWare/protectroute.js')
 
 router.post('/get', protectedRoute ,getMe );
 
