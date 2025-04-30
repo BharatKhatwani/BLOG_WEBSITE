@@ -13,7 +13,7 @@ const notificationSchema = new mongoose.Schema({
   required : true
   }, 
   type :{
-    type : string, 
+    type : 'string', 
     required : true,
     enum : ['follow ', 'like']
   }, read :{
@@ -23,4 +23,5 @@ const notificationSchema = new mongoose.Schema({
 },  {timeseries: true})
 
 const Notification = mongoose.model('Notification', notificationSchema);
-export default Notification
+// export default Notification
+module.exports = Notification;
