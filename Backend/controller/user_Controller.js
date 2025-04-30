@@ -1,8 +1,9 @@
 const express = require('express');
 const app = express();
+const {v2 : cloudinary} = require('cloudinary');
 const User = require('../model/User_Model.js');
 const mongoose = require('mongoose')
-
+const bcrypt = require('bcryptjs')
 const getUserProfile = async (req, res) => {
   try {
     const { username } = req.params; // Extract username from route params
@@ -104,6 +105,80 @@ const getSuggestedUser = async (req, res) => {
   }
 };
 
+const updateUserProfile = async (req, res) => {
+  try {
+    const {
+      fullname,
+      email,
+      username,
+      currentPassword,
+      newPassword,
+      bio,
+      link,
+      profileImg,
+      coverImg
+    } = req.body;
+
+    const userId = req.user._id;
+    let user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if ((newPassword && !currentPassword) || (!newPassword && currentPassword)) {
+      return res.status(400).json({ message: "Please provide both current and new passwords" });
+    }
+
+    if (currentPassword && newPassword) {
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: "New password must be at least 6 characters" });
+      }
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(newPassword, salt);
+    }
+
+    if (profileImg) {
+      if (user.profileImgPublicId) {
+        // await cloudinary.uploader.destroy(user.profileImgPublicId);
+        await cloudinary.uploader.destroy(user.profileImg.split('/').pop().split('.')[0]);
+
+      }
+      const uploadRes = await cloudinary.uploader.upload(profileImg, { folder: 'profileImages' });
+      user.profileImg = uploadRes.secure_url;
+      user.profileImgPublicId = uploadRes.public_id;
+    } 
+
+    if (coverImg) {
+      if (user.coverImgPublicId) {
+         await cloudinary.uploader.destroy(user.coverImg.split('/').pop().split('.')[0]);
+      }
+      const uploadRes = await cloudinary.uploader.upload(coverImg, { folder: 'coverImages' });
+      user.coverImg = uploadRes.secure_url;
+      user.coverImgPublicId = uploadRes.public_id;
+    }
+
+    // Update other fields
+    user.fullname = fullname || user.fullname;
+    user.email = email || user.email;
+    user.username = username || user.username;
+    user.bio = bio || user.bio;
+    user.link = link || user.link;
+
+    await user.save();
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    return res.status(200).json({ user: userObj });
+
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    return res.status(500).json({ message: "Something went wrong", error: error.message });
+  }
+};
 
 
-module.exports = { getUserProfile , followUnFollower, getSuggestedUser};
+module.exports = { getUserProfile , followUnFollower, getSuggestedUser, updateUserProfile};

@@ -9,7 +9,13 @@ const userRoute = require('./routes/userRouter.js'); // Fixed path
 dotenv.config(); // Call dotenv before using environment variables
 
 const app = express();
+const { v2: cloudinary } = require('cloudinary');
 
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
