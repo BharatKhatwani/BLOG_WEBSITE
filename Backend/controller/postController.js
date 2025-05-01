@@ -4,12 +4,12 @@ const Post = require('../model/post_schema');
 const { v2: cloudinary } = require('cloudinary');
 const Notification = require('../model/notification_schema');
 
-// Configure Cloudinary (ensure this is done in your app setup or here with environment variables)
-// cloudinary.config({
-//     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-//     api_key: process.env.CLOUDINARY_API_KEY,
-//     api_secret: process.env.CLOUDINARY_API_SECRET,
-// });
+// Configure Cloudinary (  ensure this is done in your app setup or here with environment variables)
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const createPost = async (req, res) => {
     try {
