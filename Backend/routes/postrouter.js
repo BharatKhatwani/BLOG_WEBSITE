@@ -2,14 +2,15 @@ const express = require('express');
 const router = express.Router();
 const Post  = require('../model/post_schema')
 const {protectedRoute }= require('../MiddleWare/protectroute.js')
-const {createPost, deletePost , commentPost, likeAndUnlikePost, getAllPost} = require('../controller/postController.js')
+const {createPost, deletePost, commentOnPost,likeUnlikePost, getAllPosts, getLikedPosts, getFollowingPosts} = require('../controller/postController.js')
 
 
 router.post('/create', protectedRoute ,createPost );
-router.post('/like/:id', protectedRoute ,likeAndUnlikePost);
-router.post('/comment/:id', protectedRoute ,commentPost);
+router.get('/likes/:id', protectedRoute, getLikedPosts);
+router.post('/like/:id', protectedRoute ,likeUnlikePost);
+router.post('/comment/:id', protectedRoute ,commentOnPost);
 router.delete('/delete/:id', protectedRoute, deletePost)
-router.get('/getAll', protectedRoute,getAllPost );
+router.get('/getAll', protectedRoute,getAllPosts );
 
 
 module.exports = router;
